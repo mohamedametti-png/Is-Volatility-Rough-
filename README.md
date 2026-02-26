@@ -5,27 +5,28 @@
 
 ## Overview
 
-Since the seminal work of Gatheral, Jaisson and Rosenbaum (2018), financial volatility has been widely described as *rough*, with empirical estimates of the Hurst exponent around $H \approx 0.1$.  
+Since the work of Gatheral, Jaisson and Rosenbaum (2018), financial volatility has often been described as *rough*, with empirical Hurst exponents around H ≈ 0.1 estimated from realized volatility data.
 
-However, recent research (Abi Jaber & Li, 2024) questions whether observed statistical roughness truly reflects intrinsic roughness of the underlying spot volatility process.
+However, more recent research (Abi Jaber & Li, 2024) questions whether observed statistical roughness truly reflects intrinsic roughness of the underlying spot volatility process.
 
 This repository investigates the question:
 
-> **Does statistical roughness necessarily imply intrinsic roughness of volatility?**
+> Does statistical roughness necessarily imply intrinsic roughness of volatility?
 
-We conduct a numerical experiment within the Volterra stochastic volatility framework, comparing asymptotic roughness implied by short-maturity skew calibration with empirical Hurst estimates obtained from simulated trajectories.
+We conduct a numerical study within the Volterra stochastic volatility framework and compare:
+
+- The Hurst exponent implied by short-maturity skew asymptotics
+- The Hurst exponent estimated from simulated volatility trajectories
 
 ---
 
 ## Model Framework
 
-We consider a Volterra–Heston type variance process:
+We consider a Volterra–Heston type variance process of the form:
 
-\[
-V_t = g_0(t)
-+ \int_0^t K(t-s)\, b V_s ds
-+ \int_0^t K(t-s)\, c \sqrt{V_s} dW_s.
-\]
+V(t) = g0(t)  
++ ∫ K(t − s) · b · V(s) ds  
++ ∫ K(t − s) · c · sqrt(V(s)) dW(s)
 
 Three kernels are studied:
 
@@ -41,27 +42,21 @@ All models are calibrated to the short-maturity ATM skew.
 
 For power-law kernels, short-maturity asymptotics predict:
 
-\[
-\text{Skew}_{ATM}(T) \sim C T^{H-\frac12}.
-\]
+Skew(T) ~ C · T^(H − 1/2)
 
 From calibration:
 
-\[
-H_{skew} = \beta + \frac12.
-\]
+H_skew = beta + 1/2
 
-This provides an *implicit structural estimate* of the Hurst exponent.
+This provides an implicit structural estimate of the Hurst exponent.
 
 ---
 
 ## Simulation Methodology
 
-We simulate the integrated variance process:
+We simulate the integrated variance:
 
-\[
-U_t = \int_0^t V_s ds,
-\]
+U(t) = ∫ V(s) ds
 
 using the **iVi (integrated Volterra implicit) scheme**  
 (Abi Jaber & Attal, 2025), which:
@@ -69,39 +64,27 @@ using the **iVi (integrated Volterra implicit) scheme**
 - Preserves positivity
 - Handles singular kernels
 - Remains stable for rough dynamics
-- Avoids explicit reconstruction of $V$
+- Avoids explicit reconstruction of V
 
 Spot variance is approximated by:
 
-\[
-V_{t_i} \approx \frac{U_{i-1,i}}{\Delta t}.
-\]
+V(t_i) ≈ (U_{i} − U_{i−1}) / Δt
 
 We primarily work with **log-volatility**:
 
-\[
-X_t = \log(\sigma_t), \quad \sigma_t = \sqrt{V_t}.
-\]
+X(t) = log(sigma(t)), where sigma(t) = sqrt(V(t))
 
 ---
 
 ## Roughness Estimation
 
-Following Gatheral, Jaisson and Rosenbaum (2018), we compute empirical $q$-variations:
+Following Gatheral, Jaisson and Rosenbaum (2018), we compute empirical q-variations:
 
-\[
-m(q,\Delta)
-=
-\frac{1}{N-\Delta}
-\sum_{i=0}^{N-\Delta-1}
-|X_{i+\Delta} - X_i|^q.
-\]
+m(q, Δ) = average of |X(t+Δ) − X(t)|^q
 
 Under monofractal scaling:
 
-\[
-m(q,\Delta) \sim C_q \Delta^{qH}.
-\]
+m(q, Δ) ~ C_q · Δ^(qH)
 
 The Hurst exponent is estimated via log–log regression.
 
@@ -109,16 +92,16 @@ The Hurst exponent is estimated via log–log regression.
 
 ## Numerical Results
 
-| Model        | $H_{skew}$ | Estimated $\widehat H$ |
-|-------------|------------|-------------------------|
-| Exponential | 0.5        | ≈ 0.48                  |
-| Fractional  | 0.24       | ≈ 0.14                  |
-| Shifted     | -0.20      | ≈ 0.38                  |
+| Model        | H_skew | Estimated H |
+|-------------|--------|-------------|
+| Exponential | 0.5    | ≈ 0.48      |
+| Fractional  | 0.24   | ≈ 0.14      |
+| Shifted     | -0.20  | ≈ 0.38      |
 
 ### Key Observations
 
-- A Markovian model can produce $\widehat H < 0.5$ on finite samples.
-- A hyper-rough asymptotic kernel may not appear strongly rough at finite resolution.
+- A Markovian model can produce H < 0.5 on finite samples.
+- A hyper-rough asymptotic kernel may not appear extremely rough at finite resolution.
 - Statistical roughness is highly scale-dependent.
 - Mean reversion distorts large-scale behavior.
 - Discretization and volatility proxies influence estimation.
@@ -140,17 +123,17 @@ Misinterpreting statistical roughness as intrinsic roughness may:
 - Misprice short-maturity options
 - Distort hedging sensitivities
 
-Statistical Hurst estimation alone should therefore **not** serve as a decisive model selection criterion.
+Statistical Hurst estimation alone should therefore **not** be used as a decisive model selection criterion.
 
 ---
 
 ## Conclusion
 
-This numerical experiment supports the findings of Abi Jaber & Li (2024):
+This numerical experiment supports the conclusions of Abi Jaber & Li (2024):
 
-> Observed statistical roughness does not necessarily imply intrinsic roughness of spot volatility.
+Observed statistical roughness does not necessarily imply intrinsic roughness of spot volatility.
 
-Roughness may emerge as an *effective finite-scale property* rather than a structural feature of the underlying model.
+Roughness may emerge as an effective finite-scale property rather than a structural feature of the underlying model.
 
 ---
 
@@ -166,4 +149,5 @@ Roughness may emerge as an *effective finite-scale property* rather than a struc
 
 Mohamed Ametti  
 Master 2 Probabilités et Finance  
+Sorbonne Université
 Sorbonne Université
